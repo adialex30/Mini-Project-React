@@ -1,19 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
+
+// OPTIMASI: Cache bigram global untuk menghindari pembuatan Set baru secara berulang pada teks yang sama
+const bigramCache = new Map();
+
+const getBigrams = (str) => {
+    if (bigramCache.has(str)) return bigramCache.get(str);
+    
+    const bigrams = new Set();
+    for (let i = 0; i < str.length - 1; i++) {
+        bigrams.add(str.substring(i, i + 2));
+    }
+    bigramCache.set(str, bigrams);
+    return bigrams;
+};
 
 const getSimilarity = (str1, str2) => {
     const s1 = str1.toLowerCase().replace(/\s+/g, '');
     const s2 = str2.toLowerCase().replace(/\s+/g, '');
     if (s1 === s2) return 1.0;
     if (s1.length < 2 || s2.length < 2) return 0.0;
-
-    const getBigrams = (str) => {
-        const bigrams = new Set();
-        for (let i = 0; i < str.length - 1; i++) {
-            bigrams.add(str.substring(i, i + 2));
-        }
-        return bigrams;
-    };
 
     const bigrams1 = getBigrams(s1);
     const bigrams2 = getBigrams(s2);
@@ -54,7 +60,7 @@ const filterUniqueCategories = (rawCategories) => {
 
     return uniqueGroups.map(group => ({
         id: group.ids.length === 1 ? group.ids[0] : group.ids,
-        label: group.label.replace(/\s*\d+$/g, '')
+        label: group.label.replace(/\s*\d+$/g, '').trim()
     }));
 };
 
@@ -87,9 +93,7 @@ export function useProductCatalog() {
         const fetchProducts = async () => {
             try {
                 setFetchLoading(true);
-                let searchParam = searchQuery || (selectedCategory !== 'all' ? selectedCategory : '');
-
-                const response = await api.get('/products', { params: { search: searchParam } });
+                const response = await api.get('/products', { params: { search: searchQuery } });
                 const productsList = response.data.data || response.data;
                 setProducts(Array.isArray(productsList) ? productsList : []);
             } catch (err) {
@@ -104,33 +108,50 @@ export function useProductCatalog() {
         }, 300);
 
         return () => clearTimeout(delayDebounceFn);
-    }, [selectedCategory, searchQuery]);
+    }, [searchQuery]);
 
-    const filteredProducts = products.map((product) => {
-        let categoryName = 'Kategori';
+    // OPTIMASI UTAMA: Membungkus komputasi dengan useMemo agar filter hanya berjalan jika data dependencies berubah
+    const filteredProducts = useMemo(() => {
+        const activeCategoryObj = selectedCategory !== 'all' 
+            ? categories.find(cat => cat.id === selectedCategory) 
+            : null;
 
-        if (product.category && product.category.name) {
-            categoryName = product.category.name.trim();
-        } else {
-            const prodCatId = product.category_id != null ? String(product.category_id).trim() : '';
+        return products
+            .map((product) => {
+                let categoryName = 'Kategori';
 
-            const matchedCat = categories.find((cat) => {
-                if (Array.isArray(cat.id)) {
-                    return cat.id.map(id => String(id).trim()).includes(prodCatId);
+                if (product.category && product.category.name) {
+                    categoryName = product.category.name.trim();
+                } else if (product.category_name) {
+                    categoryName = product.category_name.trim();
+                } else {
+                    const prodCatId = product.category_id != null ? String(product.category_id).trim() : '';
+                    const matchedCat = categories.find((cat) => {
+                        if (Array.isArray(cat.id)) {
+                            return cat.id.map(id => String(id).trim()).includes(prodCatId);
+                        }
+                        return String(cat.id).trim() === prodCatId;
+                    });
+
+                    if (matchedCat) {
+                        categoryName = matchedCat.label.trim();
+                    }
                 }
-                return String(cat.id).trim() === prodCatId;
+
+                return {
+                    ...product,
+                    category_name: categoryName
+                };
+            })
+            .filter((product) => {
+                if (selectedCategory === 'all') return true;
+                if (!activeCategoryObj) return false;
+                
+                // Menggunakan fungsi getSimilarity bawaan yang kini sudah dioptimalkan dengan cache
+                const similarity = getSimilarity(product.category_name, activeCategoryObj.label);
+                return similarity >= 0.60;
             });
-
-            if (matchedCat) {
-                categoryName = matchedCat.label.trim();
-            }
-        }
-
-        return {
-            ...product,
-            category_name: categoryName
-        };
-    });
+    }, [products, categories, selectedCategory]);
 
     const handleAddToCart = (product) => {
         setCartCount(prev => prev + 1);

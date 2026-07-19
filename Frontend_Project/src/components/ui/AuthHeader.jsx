@@ -1,12 +1,16 @@
-export default function AuthHeader({ title, subtitle }) {
+export default function AuthHeader({ title, subtitle, className = "" }) {
     return (
-        <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold tracking-tight text-indigo-600">
-                {title}
-            </h1>
-            <p className="mt-2 text-sm text-slate-500">
-                {subtitle}
-            </p>
+        <div className={`text-left mb-6 ${className}`}>
+            {title && (
+                <h1 className="text-2xl font-black tracking-tight text-slate-900">
+                    {title}
+                </h1>
+            )}
+            {subtitle && (
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                    {subtitle}
+                </p>
+            )}
         </div>
     );
 }

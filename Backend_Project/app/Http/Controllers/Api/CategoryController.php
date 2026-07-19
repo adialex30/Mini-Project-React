@@ -114,7 +114,7 @@ class CategoryController extends Controller
      */
     public function destroy(Request $request, Category $category): JsonResponse
     {
-        if (! $request->user() || $request->user()->role !== 'admin') {
+        if (! $request->user() || $request->user()->role !== 'seller') {
             return response()->json([
                 'success' => false,
                 'message' => 'You are not authorized to delete this category',

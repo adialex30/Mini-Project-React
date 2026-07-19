@@ -5,12 +5,29 @@ import Register from './Register';
 
 export default function App() {
     const [currentPage, setCurrentPage] = useState('login');
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem('user');
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
+
     const navigateTo = (pageName) => {
         setCurrentPage(pageName);
     };
 
+    const handleLoginSuccess = (authData) => {
+        setUser(authData.user);
+        navigateTo('dashboard');
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        navigateTo('login');
+    };
+
     if (currentPage === 'dashboard') {
-        return <Dashboard onLogout={() => navigateTo('login')} />;
+        return <Dashboard user={user} onLogout={handleLogout} />;
     }
 
     if (currentPage === 'register') {
@@ -19,7 +36,7 @@ export default function App() {
 
     return (
         <Login
-            onLoginSuccess={() => navigateTo('dashboard')}
+            onLoginSuccess={handleLoginSuccess}
             onNavigateToRegister={() => navigateTo('register')}
         />
     );

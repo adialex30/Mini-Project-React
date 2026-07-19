@@ -1,124 +1,152 @@
 import { useState } from 'react';
-import api from '../../services/api';
+import { X, PackagePlus, Save } from 'lucide-react';
 
-export default function AddProductModal({ isOpen, onClose, categories, onProductAdded }) {
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-
+export default function AddProductModal({ isOpen, onClose, categories, editingProduct, loading, errorMsg, onSubmitForm }) {
   const getFirstValidCategoryId = () => {
-    const firstRealCategory = categories.find(cat => cat.id !== 'all');
-    if (firstRealCategory) {
-      const firstId = firstRealCategory.id;
-      return Array.isArray(firstId) ? firstId[0] : firstId;
-    }
-    return '';
+    const validCat = categories?.find(cat => cat.id !== 'all');
+    return validCat ? (Array.isArray(validCat.id) ? validCat.id[0] : validCat.id) : '';
   };
 
-  const [formData, setFormData] = useState({
-    category_id: getFirstValidCategoryId(),
-    name: '',
-    description: '',
-    price: '',
-    stock: ''
-  });
+  const [formData, setFormData] = useState(() => editingProduct ? {
+    category_id: Number(editingProduct.category_id || editingProduct.category?.id || getFirstValidCategoryId()),
+    name: editingProduct.name || '',
+    description: editingProduct.description || '',
+    price: editingProduct.price ?? '',
+    stock: editingProduct.stock ?? ''
+  } : { category_id: getFirstValidCategoryId(), name: '', description: '', price: '', stock: '' });
 
   if (!isOpen) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: ['category_id', 'price', 'stock'].includes(name) ? Number(value) : value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMsg('');
-
-    try {
-      const response = await api.post('/products', formData);
-      const createdProduct = response.data.data || response.data;
-      
-      onProductAdded(createdProduct);
-
-      
-      setFormData({ 
-        category_id: getFirstValidCategoryId(), 
-        name: '', 
-        description: '', 
-        price: '', 
-        stock: '' 
-      });
-      onClose();
-    } catch (err) {
-      if (err.response?.status === 401) {
-        setErrorMsg('Sesi Anda berakhir. Silakan login kembali.');
-      } else if (err.response?.data?.errors) {
-        setErrorMsg(Object.values(err.response.data.errors)[0][0]);
-      } else {
-        setErrorMsg(err.response?.data?.message || 'Gagal terhubung dengan server.');
-      }
-    } finally {
-      setLoading(false);
-    }
+    setFormData(prev => ({ ...prev, [name]: ['category_id', 'price', 'stock'].includes(name) ? Number(value) : value }));
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-bold text-slate-900">Tambah Produk Baru</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+      {/* KARTU MODAL UTAMA (Cerah & Bersih) */}
+      <div className="w-full max-w-md rounded-2xl bg-white border border-slate-200 p-6 shadow-2xl animate-[fadeIn_0.2s_ease-out]">
+        
+        {/* Header Modal */}
+        <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <PackagePlus className="w-5 h-5 text-indigo-600" />
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
+              {editingProduct ? 'Edit Produk' : 'Tambah Produk'}
+            </h3>
+          </div>
           <button 
             onClick={onClose} 
             disabled={loading} 
-            className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg"
+            className="text-slate-400 hover:text-slate-600 transition-colors"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {errorMsg && <div className="mb-4 text-xs font-medium text-rose-600 bg-rose-50 p-3 rounded-lg text-left">{errorMsg}</div>}
+        {/* Error Alert (Cerah) */}
+        {errorMsg && (
+          <div className="mb-4 text-xs font-bold bg-red-50 border border-red-200 p-3.5 rounded-xl text-red-600 text-left">
+            ⚠️ {errorMsg}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+        {/* Form Inputs */}
+        <form onSubmit={(e) => { e.preventDefault(); onSubmitForm(formData); }} className="space-y-4 text-left">
+          
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Produk</label>
-            <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full text-sm rounded-lg border p-2 outline-none focus:border-indigo-500" required disabled={loading} />
+            <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Produk</label>
+            <input 
+              type="text" 
+              name="name" 
+              value={formData.name} 
+              onChange={handleChange} 
+              className="w-full text-xs bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white transition-all" 
+              required 
+              disabled={loading} 
+            />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Kategori</label>
-            <select name="category_id" value={formData.category_id} onChange={handleChange} className="w-full text-sm rounded-lg border p-2 outline-none focus:border-indigo-500" disabled={loading} required>
-              {categories.filter(cat => cat.id !== 'all').map(cat => {
-                const optVal = Array.isArray(cat.id) ? cat.id[0] : cat.id;
-                return <option key={optVal} value={optVal}>{cat.label}</option>;
-              })}
+            <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kategori</label>
+            <select 
+              name="category_id" 
+              value={formData.category_id} 
+              onChange={handleChange} 
+              className="w-full text-xs bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white transition-all cursor-pointer" 
+              disabled={loading} 
+              required
+            >
+              {categories.filter(cat => cat.id !== 'all').map(cat => (
+                <option key={Array.isArray(cat.id) ? cat.id[0] : cat.id} value={Array.isArray(cat.id) ? cat.id[0] : cat.id} className="bg-white text-slate-900">
+                  {cat.label}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Deskripsi Produk</label>
-            <textarea name="description" value={formData.description} onChange={handleChange} rows="3" className="w-full text-sm rounded-lg border p-2 outline-none focus:border-indigo-500 resize-none" required disabled={loading} />
+            <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Deskripsi</label>
+            <textarea 
+              name="description" 
+              value={formData.description} 
+              onChange={handleChange} 
+              rows="3" 
+              className="w-full text-xs bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white resize-none transition-all" 
+              required 
+              disabled={loading} 
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Harga (Rupiah)</label>
-              <input type="number" name="price" value={formData.price} onChange={handleChange} className="w-full text-sm rounded-lg border p-2" required min="0" disabled={loading} />
+              <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Harga</label>
+              <input 
+                type="number" 
+                name="price" 
+                value={formData.price} 
+                onChange={handleChange} 
+                className="w-full text-xs bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white transition-all" 
+                required 
+                min="0" 
+                disabled={loading} 
+              />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Stok</label>
-              <input type="number" name="stock" value={formData.stock} onChange={handleChange} className="w-full text-sm rounded-lg border p-2" required min="0" disabled={loading} />
+              <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Stok</label>
+              <input 
+                type="number" 
+                name="stock" 
+                value={formData.stock} 
+                onChange={handleChange} 
+                className="w-full text-xs bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white transition-all" 
+                required 
+                min="0" 
+                disabled={loading} 
+              />
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t mt-6">
-            <button type="button" onClick={onClose} disabled={loading} className="px-4 py-2 border rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50">Batal</button>
-            <button type="submit" disabled={loading} className="px-5 py-2.5 rounded-xl bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-500 disabled:bg-indigo-400">
+          {/* Bagian Tombol Aksi Akhir */}
+          <div className="flex items-center justify-end gap-2 pt-5 border-t border-slate-100 mt-6">
+            <button 
+              type="button" 
+              onClick={onClose} 
+              disabled={loading} 
+              className="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-600 rounded-xl transition-all"
+            >
+              Batal
+            </button>
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-xs font-black text-white hover:bg-indigo-700 shadow-md shadow-indigo-600/10 transition-all uppercase tracking-wider"
+            >
+              <Save className="w-3.5 h-3.5" />
               {loading ? 'Menyimpan...' : 'Simpan Produk'}
             </button>
           </div>
+
         </form>
       </div>
     </div>
