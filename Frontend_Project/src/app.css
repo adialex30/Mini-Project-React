@@ -1,1 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Helvetica Neue", Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", "Helvetica Neue", Arial, ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white font-sans text-neutral-600 antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5 {
+    @apply font-display font-bold tracking-tight text-neutral-900;
+  }
+
+  ::selection {
+    @apply bg-red-600 text-white;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-red-600);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-300 border-2 border-solid border-transparent bg-clip-padding;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-900;
+  }
+}
+
+/* Buttons: square, bold, uppercase label — the retail "ADD TO BAG" treatment */
+@utility btn {
+  @apply inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-sm px-5 py-3 text-xs font-bold uppercase tracking-wider
+  transition-colors duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100
+  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+}
+
+@utility badge {
+  @apply inline-flex items-center gap-1 rounded-sm px-2.5 py-1 text-[11px] font-semibold leading-none;
+}
+
+@utility field-input {
+  @apply w-full rounded-sm border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900
+  outline-none transition-colors duration-150 placeholder:text-neutral-400
+  focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10
+  disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+@layer components {
+  .btn-primary {
+    @apply btn bg-neutral-900 text-white hover:bg-red-600 focus-visible:ring-neutral-900;
+  }
+  .btn-secondary {
+    @apply btn border border-neutral-300 bg-white text-neutral-900 hover:border-neutral-900 focus-visible:ring-neutral-900;
+  }
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600;
+  }
+  .btn-danger-soft {
+    @apply btn border border-red-200 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white focus-visible:ring-red-600;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-neutral-500 normal-case tracking-normal hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-neutral-900;
+  }
+  .btn-sm {
+    @apply px-3.5 py-2 text-[11px];
+  }
+  .btn-icon {
+    @apply btn h-10 w-10 p-0;
+  }
+
+  /* Surfaces */
+  .card {
+    @apply rounded-sm border border-neutral-200 bg-white;
+  }
+
+  /* Form controls */
+  .field-label {
+    @apply mb-1.5 block text-xs font-medium text-neutral-500;
+  }
+  .field-select {
+    @apply field-input cursor-pointer appearance-none pr-10;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-sm px-2.5 py-1 text-[11px] font-semibold leading-none;
+  }
+  .badge-neutral {
+    @apply badge border border-neutral-300 bg-neutral-100 text-neutral-800;
+  }
+  .badge-emerald {
+    @apply badge border border-green-200 bg-green-50 text-green-800;
+  }
+  .badge-amber {
+    @apply badge border border-amber-200 bg-amber-50 text-amber-800;
+  }
+  .badge-rose {
+    @apply badge border border-red-200 bg-red-50 text-red-700;
+  }
+  .badge-outline {
+    @apply badge border border-neutral-200 bg-white text-neutral-600;
+  }
+
+  /* Small structural label — used sparingly, never as decoration */
+  .eyebrow {
+    @apply inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-red-600;
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image: linear-gradient(to right, rgb(17 17 17 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(17 17 17 / 0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-out;
+  }
+  .animate-fade-up {
+    animation: fade-up 0.3s ease-out;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

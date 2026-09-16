@@ -1,34 +1,53 @@
+import { Globe, Mail, MessageCircle } from 'lucide-react';
+
+const socialLinks = [
+  { icon: Globe, href: '#website', label: 'Website' },
+  { icon: MessageCircle, href: '#community', label: 'Komunitas' },
+  { icon: Mail, href: 'mailto:hello@dibiassets.com', label: 'Email' },
+];
+
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-slate-200 py-12 mt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-        
-        {/* Links */}
-        <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 font-semibold tracking-wide">
-          <a href="#about" className="hover:text-indigo-600 transition-colors">About Us</a>
-          <a href="#contact" className="hover:text-indigo-600 transition-colors">Contact</a>
-          <a href="#terms" className="hover:text-indigo-600 transition-colors">Terms of Service</a>
-          <a href="#privacy" className="hover:text-indigo-600 transition-colors">Privacy Policy</a>
-        </div>
-        
-        {/* Social Icons */}
-        <div className="flex gap-4">
-          {["Vector - 0.png", "Depth 8, Frame 0.png", "Vector - 2.png"].map((img, i) => (
-            <a 
-              key={i} 
-              href={`#social-${i}`} 
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-indigo-300 transition-all"
-            >
-              <img src={`./image/${img}`} alt="Social" className="h-4 w-4 opacity-60 group-hover:opacity-100 grayscale hover:grayscale-0" />
-            </a>
-          ))}
+    <footer className="mt-16 border-t border-neutral-200 bg-white">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-between gap-8 md:flex-row md:items-start">
+          <div className="text-center md:text-left">
+            <div className="mb-3 flex items-center justify-center gap-0 md:justify-start">
+              <div className="flex h-8 items-center bg-red-600 px-2">
+                <span className="font-display text-xs font-black uppercase tracking-wide text-white">Dibi</span>
+              </div>
+              <span className="font-display text-xs font-black uppercase tracking-wide text-neutral-900">Assets</span>
+            </div>
+            <p className="max-w-xs text-sm text-neutral-500">
+              Marketplace aset digital untuk developer &amp; kreator profesional.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-neutral-500 md:justify-end">
+            <a href="#about" className="transition-colors hover:text-red-600">Tentang Kami</a>
+            <a href="#contact" className="transition-colors hover:text-red-600">Kontak</a>
+            <a href="#terms" className="transition-colors hover:text-red-600">Syarat Layanan</a>
+            <a href="#privacy" className="transition-colors hover:text-red-600">Kebijakan Privasi</a>
+          </div>
         </div>
 
-      </div>
-
-      {/* Copyright */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 pt-6 border-t border-slate-100 text-center text-xs text-slate-400 font-medium tracking-wider">
-        &copy; 2026 DibiTech. All rights reserved.
+        <div className="mt-10 flex flex-col-reverse items-center justify-between gap-4 border-t border-neutral-200 pt-6 sm:flex-row">
+          <p className="text-xs text-neutral-400">
+            &copy; {new Date().getFullYear()} DibiTech. All rights reserved.
+          </p>
+          <div className="flex gap-2">
+            {socialLinks.map(({ icon: Icon, href, label }) => (
+              <a
+                key={label}
+                href={href}
+                aria-label={label}
+                className="flex h-9 w-9 items-center justify-center border border-neutral-200 text-neutral-500 transition-all hover:border-neutral-900 hover:text-neutral-900"
+              >
+                <Icon className="h-4 w-4" />
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
     </footer>
   );

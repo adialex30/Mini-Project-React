@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
 
-// OPTIMASI: Cache bigram global untuk menghindari pembuatan Set baru secara berulang pada teks yang sama
 const bigramCache = new Map();
 
 const getBigrams = (str) => {
@@ -68,10 +67,16 @@ export function useProductCatalog() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([{ id: 'all', label: 'Semua Produk' }]);
     const [selectedCategory, setSelectedCategory] = useState('all');
+    
+    // 1. State untuk teks input (instan)
     const [searchQuery, setSearchQuery] = useState('');
+    // 2. State bayangan untuk memicu API (tertunda)
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+    
     const [cartCount, setCartCount] = useState(0);
     const [fetchLoading, setFetchLoading] = useState(true);
 
+    // Memuat Kategori saat pertama kali load
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -89,11 +94,21 @@ export function useProductCatalog() {
         fetchCategories();
     }, []);
 
+    // 3. Masukkan Logika Debounce di sini untuk menjembatani searchQuery ke debouncedSearchQuery
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+        }, 500); // Menunggu 500ms setelah user berhenti mengetik
+
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
+
+    // 4. Ubah trigger useEffect API agar hanya berjalan saat 'debouncedSearchQuery' berubah
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 setFetchLoading(true);
-                const response = await api.get('/products', { params: { search: searchQuery } });
+                const response = await api.get('/products', { params: { search: debouncedSearchQuery } });
                 const productsList = response.data.data || response.data;
                 setProducts(Array.isArray(productsList) ? productsList : []);
             } catch (err) {
@@ -103,14 +118,9 @@ export function useProductCatalog() {
             }
         };
 
-        const delayDebounceFn = setTimeout(() => {
-            fetchProducts();
-        }, 300);
+        fetchProducts();
+    }, [debouncedSearchQuery]); // Hanya trigger ketika debounced query berubah
 
-        return () => clearTimeout(delayDebounceFn);
-    }, [searchQuery]);
-
-    // OPTIMASI UTAMA: Membungkus komputasi dengan useMemo agar filter hanya berjalan jika data dependencies berubah
     const filteredProducts = useMemo(() => {
         const activeCategoryObj = selectedCategory !== 'all' 
             ? categories.find(cat => cat.id === selectedCategory) 
@@ -147,23 +157,24 @@ export function useProductCatalog() {
                 if (selectedCategory === 'all') return true;
                 if (!activeCategoryObj) return false;
                 
-                // Menggunakan fungsi getSimilarity bawaan yang kini sudah dioptimalkan dengan cache
                 const similarity = getSimilarity(product.category_name, activeCategoryObj.label);
                 return similarity >= 0.60;
             });
     }, [products, categories, selectedCategory]);
 
-    const handleAddToCart = (product) => {
+    const handleAddToCart = (product, onSuccess) => {
         setCartCount(prev => prev + 1);
-        alert(`Berhasil menambahkan "${product.name}" ke keranjang!`);
+        if (typeof onSuccess === 'function') {
+            onSuccess(product);
+        }
     };
 
     return {
         categories,
         selectedCategory,
         setSelectedCategory,
-        searchQuery,
-        setSearchQuery,
+        searchQuery,      // Tetap dilempar agar komponen input mendeteksi perubahan instan text
+        setSearchQuery,   // Tetap dilempar agar komponen input bisa mengetik dengan lancar
         cartCount,
         fetchLoading,
         filteredProducts,

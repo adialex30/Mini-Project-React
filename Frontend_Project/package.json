@@ -13,7 +13,8 @@
     "axios": "^1.18.1",
     "lucide-react": "^1.25.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -28,6 +29,7 @@
     "globals": "^17.7.0",
     "postcss": "^8.5.19",
     "tailwindcss": "^4.3.2",
-    "vite": "^8.1.1"
+    "vite": "^8.1.1",
+    "vite-plugin-react-click-to-component": "^4.2.3"
   }
 }

@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { ArrowLeft, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import ProductService from '../services/ProductService';
 import InputGroup from '../components/ui/InputGroup';
 import SelectGroup from '../components/ui/SelectGroup';
 
-export default function Register({ onNavigateToLogin }) {
+export default function Register({ onNavigateToLogin, onNavigateToLanding }) {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', password_confirmation: '', role: 'buyer' });
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -40,20 +41,77 @@ export default function Register({ onNavigateToLogin }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 items-center justify-center p-4 text-left">
-      <div className="w-full max-w-md bg-slate-900/40 border border-slate-900 rounded-2xl p-8 shadow-2xl backdrop-blur-sm">
-        <div className="text-center mb-8"><h1 className="text-2xl font-black text-white">Buat Akun Baru</h1><p className="mt-1.5 text-xs text-slate-400">Silakan isi data diri Anda untuk mendaftar</p></div>
-        {error && <div className="mb-4 text-xs font-bold bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl text-rose-400">{error}</div>}
-        {successMessage && <div className="mb-4 text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl text-emerald-400">{successMessage}</div>}
-        <form onSubmit={handleFormSubmit} className="space-y-4">
-          <InputGroup label="Nama Lengkap" type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Nama Lengkap" />
-          <InputGroup label="Alamat Email" type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="nama@email.com" />
-          <InputGroup label="Password" type="password" name="password" value={formData.password} onChange={handleInputChange} placeholder="••••••••" />
-          <InputGroup label="Konfirmasi Password" type="password" name="password_confirmation" value={formData.password_confirmation} onChange={handleInputChange} placeholder="••••••••" />
-          <SelectGroup label="Daftar Sebagai" name="role" value={formData.role} onChange={handleInputChange} options={[{ value: 'buyer', label: 'Pembeli (Buyer)' }, { value: 'seller', label: 'Penjual (Seller)' }]} />
-          <button type="submit" disabled={loading} className="w-full rounded-xl bg-white py-3 text-xs font-black text-slate-950 hover:bg-slate-100 shadow-md transition-all uppercase tracking-widest mt-2">{loading ? "Memproses..." : "Daftar Sekarang"}</button>
-        </form>
-        <div className="mt-8 pt-5 border-t border-slate-900 text-center text-xs text-slate-400">Sudah punya akun? <button type="button" onClick={onNavigateToLogin} className="font-bold text-indigo-400 hover:text-indigo-300 transition-colors">Masuk di sini</button></div>
+    <div className="flex min-h-screen items-center justify-center bg-white p-4 font-sans antialiased">
+      <div className="card w-full max-w-md p-6 sm:p-8">
+        <div className="w-full space-y-6">
+          <button
+            type="button"
+            onClick={onNavigateToLanding}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-500 transition-colors hover:text-red-600"
+          >
+            <ArrowLeft className="h-4 w-4" /> Kembali ke Beranda
+          </button>
+
+          <div className="text-left">
+            <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Buat Akun Baru</h1>
+            <p className="mt-1.5 text-sm text-neutral-500">Silakan isi data diri Anda untuk bergabung di DibiAssets.</p>
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-2.5 rounded-sm border border-red-200 bg-red-50 p-3.5 text-sm font-medium text-red-700">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>{error}</p>
+            </div>
+          )}
+          {successMessage && (
+            <div className="flex items-start gap-2.5 rounded-sm border border-green-200 bg-green-50 p-3.5 text-sm font-medium text-green-800">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>{successMessage}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleFormSubmit} className="space-y-4">
+            <InputGroup label="Nama Lengkap" type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Nama Lengkap" />
+            <InputGroup label="Alamat Email" type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="nama@email.com" />
+            <InputGroup label="Password" type="password" name="password" value={formData.password} onChange={handleInputChange} placeholder="••••••••" />
+            <InputGroup label="Konfirmasi Password" type="password" name="password_confirmation" value={formData.password_confirmation} onChange={handleInputChange} placeholder="••••••••" />
+            <SelectGroup
+              label="Daftar Sebagai"
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
+              options={[
+                { value: 'buyer', label: 'Pembeli (Unduh Aset Digital)' },
+                { value: 'seller', label: 'Kreator / Penjual (Jual Aset Digital)' }
+              ]}
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full py-3"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Memproses...
+                </>
+              ) : "Daftar Sekarang"}
+            </button>
+          </form>
+
+          <div className="border-t border-neutral-200 pt-4 text-center">
+            <p className="text-sm text-neutral-500">
+              Sudah punya akun?{" "}
+              <button
+                type="button"
+                onClick={onNavigateToLogin}
+                className="font-semibold text-red-600 transition-colors hover:text-red-700"
+              >
+                Masuk di sini
+              </button>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

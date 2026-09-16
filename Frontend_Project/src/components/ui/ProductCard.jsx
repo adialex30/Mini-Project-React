@@ -1,41 +1,29 @@
 import { useState } from 'react';
-import { Trash2, ShoppingCart, AlertTriangle, X, Pencil } from 'lucide-react';
+import { Trash2, ShoppingCart, AlertTriangle, X, Pencil, Eye, ImageOff } from 'lucide-react';
 
-// ================= COMPONENT 1: ConfirmationModal =================
 function ConfirmationModal({ isOpen, onClose, onConfirm, title, message, type = 'danger' }) {
   if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-      {/* Kartu Modal Cerah */}
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all scale-100 animate-[fadeIn_0.2s_ease-out]">
-        
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 p-4">
+      <div className="animate-fade-up card w-full max-w-md overflow-hidden shadow-2xl">
+        <div className="flex items-center justify-between border-b border-neutral-200 p-4">
           <div className="flex items-center gap-2">
             {type === 'danger' ? (
-              <AlertTriangle className="w-5 h-5 text-rose-600" />
+              <AlertTriangle className="h-5 w-5 text-red-600" />
             ) : (
-              <Pencil className="w-5 h-5 text-indigo-600" />
+              <Pencil className="h-5 w-5 text-neutral-900" />
             )}
-            <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider">{title}</h3>
+            <h3 className="text-sm font-semibold text-neutral-900">{title}</h3>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg transition-colors">
-            <X className="w-4 h-4" />
+          <button onClick={onClose} className="p-1 text-neutral-400 transition-colors hover:text-neutral-600">
+            <X className="h-4 w-4" />
           </button>
         </div>
-
-        {/* Modal Content */}
-        <div className="p-5 text-xs font-medium text-slate-600 text-left leading-relaxed">
+        <div className="p-5 text-left text-sm leading-relaxed text-neutral-600">
           {message}
         </div>
-
-        {/* Modal Footer / Action Buttons */}
-        <div className="flex justify-end gap-2 p-4 bg-slate-50 border-t border-slate-100">
-          <button
-            onClick={onClose}
-            className="px-4 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all"
-          >
+        <div className="flex justify-end gap-2 border-t border-neutral-200 bg-neutral-50 p-4">
+          <button onClick={onClose} className="btn-secondary btn-sm">
             Batal
           </button>
           <button
@@ -43,12 +31,7 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, title, message, type = 
               onConfirm();
               onClose();
             }}
-            className={`px-5 py-2.5 text-xs font-black text-white rounded-xl transition-all active:scale-[0.98] uppercase tracking-wider ${
-              type === 'danger' 
-                ? 'bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-600/10' 
-                : 'bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/10'
-            }`}
-          >
+            className={type === 'danger' ? 'btn-danger btn-sm' : 'btn-primary btn-sm'}>
             {type === 'danger' ? 'Ya, Hapus' : 'Lanjutkan'}
           </button>
         </div>
@@ -57,11 +40,69 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, title, message, type = 
   );
 }
 
-// ================= COMPONENT 2: Main ProductCard =================
+function DetailProductModal({ isOpen, onClose, product, formatRupiah, getImageUrl, userRole, onAddToCart }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 p-4">
+      <div className="animate-fade-up card flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden shadow-2xl">
+        <div className="flex items-center justify-between border-b border-neutral-200 p-4">
+          <span className="badge-neutral">
+            {product.category_name}
+          </span>
+          <button onClick={onClose} className="p-1 text-neutral-400 transition-colors hover:text-neutral-600">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex-1 space-y-4 overflow-y-auto p-6 text-left">
+          <div className="h-48 w-full overflow-hidden border border-neutral-200 bg-neutral-50">
+            <img src={getImageUrl()} alt={product.name} className="h-full w-full object-cover" />
+          </div>
+          <div>
+            <h2 className="mb-1 text-xl font-bold text-neutral-900">{product.name}</h2>
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-bold text-neutral-900">{formatRupiah(product.price)}</span>
+              <span className={product.stock <= 0 ? 'badge-rose' : 'badge-outline'}>
+                {product.stock <= 0 ? 'Stok Habis' : `Tersedia: ${product.stock} items`}
+              </span>
+            </div>
+          </div>
+          <hr className="border-neutral-200" />
+          <div>
+            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-neutral-400">Deskripsi Lengkap Asset</h4>
+            <p className="whitespace-pre-line border border-neutral-200 bg-neutral-50 p-3.5 text-sm leading-relaxed text-neutral-600">
+              {product.description || 'Tidak ada deskripsi tambahan untuk produk ini.'}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-4 border-t border-neutral-200 bg-neutral-50 p-4">
+          <button onClick={onClose} className="btn-ghost btn-sm">
+            Tutup Detail
+          </button>
+          {userRole === 'buyer' && (
+            <button
+              type="button"
+              disabled={product.stock <= 0}
+              onClick={() => {
+                onAddToCart(product);
+                onClose();
+              }}
+              className="btn-primary flex-1"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {product.stock > 0 ? 'Tambahkan Belanjaan' : 'Stok Habis'}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProductCard({ product, userData, onAddToCart, onEdit, onDelete }) {
-  const userRole = userData?.role?.toLowerCase()?.trim(); 
+  const userRole = userData?.role?.toLowerCase()?.trim();
   const [modalType, setModalType] = useState(null);
-  
+
   const isLowStock = product.stock > 0 && product.stock < 5;
 
   const formatRupiah = (number) => {
@@ -85,87 +126,81 @@ export default function ProductCard({ product, userData, onAddToCart, onEdit, on
     const seed = product.id || (product.name ? product.name.length : 0);
     const imageIndex = seed % digitalImages.length;
     const photoId = digitalImages[imageIndex];
-    return `https://images.unsplash.com/photo-${photoId}?w=600&h=400&fit=cover&auto=format&q=80`;
+    return `https://images.unsplash.com/photo-${photoId}?w=600&h=400&fit=crop&auto=format&q=80`;
   };
+
+  const stockBadgeClass = product.stock <= 0
+    ? 'badge-rose'
+    : isLowStock
+      ? 'badge-amber'
+      : 'badge-neutral';
 
   return (
     <>
-      {/* Container Utama Kartu Produk (Cerah & Premium) */}
-      <div className="flex flex-col bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 group h-full justify-between text-left overflow-hidden">
-        
-        <div>
-          {/* Bagian Image & Badges */}
-          <div className="h-48 bg-slate-50 flex items-center justify-center border-b border-slate-100 relative overflow-hidden">
-            <img 
-              src={getDummyImageUrl()} 
-              alt={product.name}
-              loading="lazy"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
-              onError={(e) => {
-                e.target.onerror = null; 
-                e.target.parentElement.innerHTML = `
-                  <div class="flex flex-col items-center gap-2 text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">Asset Digital</span>
-                  </div>
-                `;
-              }}
-            />
-            
-            {/* Kategori Badge (Clean Glass Style) */}
-            <span className="text-[10px] font-black tracking-widest text-slate-700 uppercase bg-white/90 px-2.5 py-1.5 rounded-xl shadow-sm border border-slate-200/60 backdrop-blur-md absolute top-3 left-3 z-10">
-              {product.category_name}
-            </span>
+      <div className="card group flex h-full flex-col justify-between overflow-hidden text-left transition-colors duration-200 hover:border-neutral-900">
+        <div
+          onClick={() => setModalType('detail')}
+          className="flex flex-1 cursor-pointer flex-col justify-between"
+        >
+          <div>
+            <div className="relative h-48 overflow-hidden border-b border-neutral-200 bg-neutral-50">
+              <img
+                src={getDummyImageUrl()}
+                alt={product.name}
+                loading="lazy"
+                className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105 group-hover:opacity-100"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div className="hidden absolute inset-0 flex-col items-center justify-center gap-2 text-neutral-400">
+                <ImageOff className="h-6 w-6" />
+                <span className="text-xs font-medium">Aset Digital</span>
+              </div>
+              <span className="badge-outline absolute left-3 top-3 z-10 border-neutral-200 bg-white">
+                {product.category_name}
+              </span>
+              <span className={`${stockBadgeClass} absolute right-3 top-3 z-10`}>
+                {product.stock <= 0 ? 'Habis' : `Stok: ${product.stock}`}
+              </span>
+            </div>
+            <div className="flex flex-col p-5">
+              <h3 className="mb-1.5 flex items-center justify-between gap-2 text-base font-semibold text-neutral-900 transition-colors group-hover:text-red-600">
+                <span className="line-clamp-1">{product.name}</span>
+                <Eye className="h-4 w-4 shrink-0 text-neutral-300 opacity-0 transition-all group-hover:text-neutral-900 group-hover:opacity-100" />
+              </h3>
+              <p className="mb-4 min-h-[32px] line-clamp-2 text-sm leading-relaxed text-neutral-500">
+                {product.description}
+              </p>
 
-            {/* Stock Badge (Lebih Tegas di Layar Terang) */}
-            <span className={`px-2.5 py-1.5 rounded-xl text-[10px] font-black tracking-widest uppercase absolute top-3 right-3 z-10 shadow-sm backdrop-blur-md border ${
-              product.stock <= 0 
-                ? 'bg-rose-50 text-rose-600 border-rose-200' 
-                : isLowStock 
-                  ? 'bg-amber-50 text-amber-700 border-amber-200' 
-                  : 'bg-indigo-50 text-indigo-600 border-indigo-200'
-            }`}>
-              {product.stock <= 0 ? 'Habis' : `Stok: ${product.stock}`}
-            </span>
-          </div>
-
-          {/* Konten teks Produk */}
-          <div className="flex flex-col p-5">
-            <h3 className="font-black text-slate-950 text-base line-clamp-1 mb-1.5 group-hover:text-indigo-600 transition-colors">
-              {product.name}
-            </h3>
-            <p className="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-4 min-h-[32px]">
-              {product.description}
-            </p>
-            
-            <div className="flex justify-between items-center pt-3 border-t border-slate-100">
-              <div>
-                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Harga</span>
-                <span className="text-lg font-black text-slate-900">{formatRupiah(product.price)}</span>
+              <div className="flex items-center justify-between border-t border-neutral-200 pt-3">
+                <div>
+                  <span className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-neutral-400">Harga</span>
+                  <span className="text-lg font-bold text-neutral-900">{formatRupiah(product.price)}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Bagian Tombol Aksi Bawah */}
-        <div className="px-5 pb-5 pt-1 flex justify-end gap-2 mt-auto">
-          
+        <div className="relative z-10 mt-auto flex justify-end gap-2 px-5 pb-5 pt-1">
           {userRole === 'seller' && (
-            <div className="flex gap-2 ml-auto w-full justify-end">
+            <div className="ml-auto flex w-full justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setModalType('edit')}
-                className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all active:scale-[0.98]"
+                className="btn-secondary btn-sm"
               >
-                <Pencil className="w-3.5 h-3.5 text-slate-400" />
+                <Pencil className="h-3.5 w-3.5 text-neutral-400" />
                 Edit
               </button>
               <button
                 type="button"
                 onClick={() => setModalType('delete')}
-                className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all active:scale-[0.98]"
+                className="btn-danger-soft btn-sm"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="h-3.5 w-3.5" />
                 Hapus
               </button>
             </div>
@@ -176,17 +211,23 @@ export default function ProductCard({ product, userData, onAddToCart, onEdit, on
               type="button"
               onClick={() => onAddToCart(product)}
               disabled={product.stock <= 0}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-xs font-black text-white shadow-md shadow-indigo-600/10 transition-all hover:bg-indigo-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:border disabled:border-slate-200 active:scale-[0.98] uppercase tracking-wider"
+              className="btn-primary w-full"
             >
-              <ShoppingCart className="w-4 h-4" />
+              <ShoppingCart className="h-4 w-4" />
               {product.stock > 0 ? 'Tambah Ke Keranjang' : 'Stok Habis'}
             </button>
           )}
-
         </div>
       </div>
-
-      {/* MODAL KONFIRMASI HAPUS */}
+      <DetailProductModal
+        isOpen={modalType === 'detail'}
+        onClose={() => setModalType(null)}
+        product={product}
+        formatRupiah={formatRupiah}
+        getImageUrl={getDummyImageUrl}
+        userRole={userRole}
+        onAddToCart={onAddToCart}
+      />
       <ConfirmationModal
         isOpen={modalType === 'delete'}
         onClose={() => setModalType(null)}
@@ -197,8 +238,6 @@ export default function ProductCard({ product, userData, onAddToCart, onEdit, on
         message={`Apakah Anda yakin ingin menghapus "${product.name}"? Data produk yang dihapus permanen tidak dapat dipulihkan kembali.`}
         type="danger"
       />
-
-      {/* MODAL KONFIRMASI EDIT */}
       <ConfirmationModal
         isOpen={modalType === 'edit'}
         onClose={() => setModalType(null)}

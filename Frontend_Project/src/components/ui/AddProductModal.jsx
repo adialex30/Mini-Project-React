@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, PackagePlus, Save } from 'lucide-react';
+import { X, PackagePlus, Save, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function AddProductModal({ isOpen, onClose, categories, editingProduct, loading, errorMsg, onSubmitForm }) {
   const getFirstValidCategoryId = () => {
@@ -23,62 +23,52 @@ export default function AddProductModal({ isOpen, onClose, categories, editingPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-      {/* KARTU MODAL UTAMA (Cerah & Bersih) */}
-      <div className="w-full max-w-md rounded-2xl bg-white border border-slate-200 p-6 shadow-2xl animate-[fadeIn_0.2s_ease-out]">
-        
-        {/* Header Modal */}
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 p-4">
+      <div className="animate-fade-up card w-full max-w-md p-6 shadow-2xl">
+        <div className="mb-6 flex items-center justify-between border-b border-neutral-200 pb-4">
           <div className="flex items-center gap-2">
-            <PackagePlus className="w-5 h-5 text-indigo-600" />
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
+            <PackagePlus className="h-5 w-5 text-red-600" />
+            <h3 className="text-sm font-semibold text-neutral-900">
               {editingProduct ? 'Edit Produk' : 'Tambah Produk'}
             </h3>
           </div>
-          <button 
-            onClick={onClose} 
-            disabled={loading} 
-            className="text-slate-400 hover:text-slate-600 transition-colors"
-          >
-            <X className="w-4 h-4" />
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="text-neutral-400 transition-colors hover:text-neutral-600">
+            <X className="h-4 w-4" />
           </button>
         </div>
-
-        {/* Error Alert (Cerah) */}
         {errorMsg && (
-          <div className="mb-4 text-xs font-bold bg-red-50 border border-red-200 p-3.5 rounded-xl text-red-600 text-left">
-            ⚠️ {errorMsg}
+          <div className="mb-4 flex items-start gap-2.5 rounded-sm border border-red-200 bg-red-50 p-3.5 text-left text-sm font-medium text-red-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>{errorMsg}</p>
           </div>
         )}
-
-        {/* Form Inputs */}
         <form onSubmit={(e) => { e.preventDefault(); onSubmitForm(formData); }} className="space-y-4 text-left">
-          
           <div>
-            <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Produk</label>
-            <input 
-              type="text" 
-              name="name" 
-              value={formData.name} 
-              onChange={handleChange} 
-              className="w-full text-xs bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white transition-all" 
-              required 
-              disabled={loading} 
+            <label className="field-label">Nama Produk</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="field-input"
+              required
+              disabled={loading}
             />
           </div>
-
           <div>
-            <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kategori</label>
-            <select 
-              name="category_id" 
-              value={formData.category_id} 
-              onChange={handleChange} 
-              className="w-full text-xs bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white transition-all cursor-pointer" 
-              disabled={loading} 
-              required
-            >
+            <label className="field-label">Kategori</label>
+            <select
+              name="category_id"
+              value={formData.category_id}
+              onChange={handleChange}
+              className="field-select"
+              disabled={loading}
+              required>
               {categories.filter(cat => cat.id !== 'all').map(cat => (
-                <option key={Array.isArray(cat.id) ? cat.id[0] : cat.id} value={Array.isArray(cat.id) ? cat.id[0] : cat.id} className="bg-white text-slate-900">
+                <option key={Array.isArray(cat.id) ? cat.id[0] : cat.id} value={Array.isArray(cat.id) ? cat.id[0] : cat.id} className="bg-white text-neutral-900">
                   {cat.label}
                 </option>
               ))}
@@ -86,67 +76,61 @@ export default function AddProductModal({ isOpen, onClose, categories, editingPr
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Deskripsi</label>
-            <textarea 
-              name="description" 
-              value={formData.description} 
-              onChange={handleChange} 
-              rows="3" 
-              className="w-full text-xs bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white resize-none transition-all" 
-              required 
-              disabled={loading} 
+            <label className="field-label">Deskripsi</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows="3"
+              className="field-input resize-none"
+              required
+              disabled={loading}
             />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Harga</label>
-              <input 
-                type="number" 
-                name="price" 
-                value={formData.price} 
-                onChange={handleChange} 
-                className="w-full text-xs bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white transition-all" 
-                required 
-                min="0" 
-                disabled={loading} 
+              <label className="field-label">Harga</label>
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                className="field-input"
+                required
+                min="0"
+                disabled={loading}
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Stok</label>
-              <input 
-                type="number" 
-                name="stock" 
-                value={formData.stock} 
-                onChange={handleChange} 
-                className="w-full text-xs bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white transition-all" 
-                required 
-                min="0" 
-                disabled={loading} 
+              <label className="field-label">Stok</label>
+              <input
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleChange}
+                className="field-input"
+                required
+                min="0"
+                disabled={loading}
               />
             </div>
           </div>
-
-          {/* Bagian Tombol Aksi Akhir */}
-          <div className="flex items-center justify-end gap-2 pt-5 border-t border-slate-100 mt-6">
-            <button 
-              type="button" 
-              onClick={onClose} 
-              disabled={loading} 
-              className="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-600 rounded-xl transition-all"
-            >
+          <div className="mt-6 flex items-center justify-end gap-2 border-t border-neutral-200 pt-5">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="btn-secondary btn-sm">
               Batal
             </button>
-            <button 
-              type="submit" 
-              disabled={loading} 
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-xs font-black text-white hover:bg-indigo-700 shadow-md shadow-indigo-600/10 transition-all uppercase tracking-wider"
-            >
-              <Save className="w-3.5 h-3.5" />
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary btn-sm">
+              {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
               {loading ? 'Menyimpan...' : 'Simpan Produk'}
             </button>
           </div>
-
         </form>
       </div>
     </div>

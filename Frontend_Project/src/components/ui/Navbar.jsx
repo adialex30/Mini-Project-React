@@ -1,47 +1,71 @@
-export default function Navbar({ user, onLogout, roleBadgeStyles, getInitials }) {
+import { LogOut } from 'lucide-react';
+
+export default function Navbar({
+  user,
+  onLogout,
+  roleBadgeStyles,
+  getInitials = (name) => name?.slice(0, 2).toUpperCase() || '??',
+  onNavigateToLogin,
+  onNavigateToRegister
+}) {
   return (
-    <header className="bg-white/80 border-b border-slate-200 sticky top-0 z-50 shadow-sm backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
-        
-        {/* Logo Brand */}
-        <div className="flex items-center gap-3 cursor-pointer group">
-          <div className="bg-slate-950 text-white px-3 py-1.5 rounded-xl font-black text-xl tracking-wider transition-transform group-hover:scale-105">
-            DT
+    <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+
+        {/* Brand */}
+        <div className="flex cursor-pointer items-center gap-0">
+          <div className="flex h-9 items-center bg-red-600 px-2.5">
+            <span className="font-display text-sm font-black uppercase tracking-wide text-white">
+              Dibi
+            </span>
           </div>
-          <span className="font-black text-xl text-slate-900 tracking-tight">
-            Dibi<span className="text-indigo-600">Tech</span>
+          <span className="font-display text-sm font-black uppercase tracking-wide text-neutral-900">
+            Assets
           </span>
         </div>
 
-        {/* Sisi Kanan: Profil & Tombol Keluar */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 bg-white border border-slate-200 px-3 py-1.5 rounded-2xl shadow-sm">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-indigo-500/10">
-              {user?.avatar || getInitials(user?.name)}
-            </div>
-            <div className="text-left hidden sm:block">
-              {/* NOTE: Mengoreksi typo utility class dari 'from-indigo-500' ke warna text solid 'text-slate-900' */}
-              <div className="text-sm font-bold text-slate-900 leading-tight">
-                {user?.name || "-"}
+        {/* Right side */}
+        <div className="flex items-center gap-3">
+          {user ? (
+            <>
+              <div className="flex items-center gap-3 border border-neutral-200 py-1 pl-1 pr-3">
+                <div className="flex h-8 w-8 items-center justify-center bg-neutral-900 text-xs font-semibold text-white">
+                  {user?.avatar || getInitials(user?.name)}
+                </div>
+                <div className="hidden text-left leading-tight sm:block">
+                  <div className="text-sm font-semibold text-neutral-900">
+                    {user?.name || "-"}
+                  </div>
+                  <span className={`badge mt-0.5 ${roleBadgeStyles}`}>
+                    {user?.role || "Guest"}
+                  </span>
+                </div>
               </div>
-              <div className="mt-1 flex items-center">
-                <span className={`text-[10px] uppercase tracking-widest font-black px-2 py-0.5 rounded-md border ${roleBadgeStyles}`}>
-                  {user?.role || "Guest"}
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="h-6 w-[1px] bg-slate-200"></div>
-          
-          <button 
-            onClick={onLogout} 
-            className="text-sm font-bold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 px-4 py-2.5 rounded-xl transition-all border border-rose-200 hover:border-transparent active:scale-95"
-          >
-            Keluar
-          </button>
+              <button
+                onClick={onLogout}
+                className="btn-danger-soft btn-sm"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Keluar</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={onNavigateToLogin}
+                className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-neutral-700 transition-colors hover:text-red-600"
+              >
+                Masuk
+              </button>
+              <button
+                onClick={onNavigateToRegister}
+                className="btn-primary btn-sm"
+              >
+                Daftar
+              </button>
+            </>
+          )}
         </div>
-
       </div>
     </header>
   );

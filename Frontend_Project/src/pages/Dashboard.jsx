@@ -3,7 +3,7 @@ import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 
 export default function Dashboard({ user, onLogout }) {
-  
+
   const getInitials = (name) => {
     if (!name) return "U";
     const parts = name.split(" ");
@@ -11,19 +11,19 @@ export default function Dashboard({ user, onLogout }) {
   };
 
   const isSeller = user?.role?.toLowerCase() === 'seller';
-  
-  const roleBadgeStyles = isSeller 
-    ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-    : "bg-indigo-50 text-indigo-700 border-indigo-200";
+
+  const roleBadgeStyles = isSeller
+    ? "border-neutral-300 bg-neutral-100 text-neutral-800"
+    : "border-red-200 bg-red-50 text-red-700";
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-600 antialiased selection:bg-indigo-600 selection:text-white">
-      
-      <Navbar 
-        user={user} 
-        onLogout={onLogout} 
-        roleBadgeStyles={roleBadgeStyles} 
-        getInitials={getInitials} 
+    <div className="flex min-h-screen flex-col bg-white font-sans text-neutral-600 antialiased">
+
+      <Navbar
+        user={user}
+        onLogout={onLogout}
+        roleBadgeStyles={roleBadgeStyles}
+        getInitials={getInitials}
       />
 
       <main className="flex-grow">
@@ -31,7 +31,7 @@ export default function Dashboard({ user, onLogout }) {
       </main>
 
       <Footer />
-      
+
     </div>
   );
 }
