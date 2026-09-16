@@ -20,7 +20,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://mini-project-react-taupe.vercel.app/',
+        'https://mini-project-react-taupe.vercel.app',
         'http://localhost:5173',
     ],
 
