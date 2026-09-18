@@ -14,7 +14,6 @@ api.interceptors.request.use(
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('AXIOS: Mengirim token -> Bearer', token.substring(0, 10) + '...');
     } else {
       console.warn('AXIOS: Tidak ada token yang dikirim (User mungkin belum login).');
     }
