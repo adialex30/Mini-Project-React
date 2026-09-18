@@ -2,7 +2,7 @@
 
 Marketplace sederhana untuk jual-beli aset digital (UI Kit, Themes, Illustrations, Icons, E-book, dll). Ada dua peran pengguna: **Seller** (kreator/penjual yang mengelola produk) dan **Buyer** (pembeli yang menjelajah katalog).
 
-- **Frontend (Vercel):** https://mini-project-react-taupe.vercel.app/#/landing
+- **Frontend (Vercel):** https://mini-project-react-taupe.vercel.app
 - **Backend API (Railway):** https://mini-project-react-production-dcb3.up.railway.app/api
 
 ---
